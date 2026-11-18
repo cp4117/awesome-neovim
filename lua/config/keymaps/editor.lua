@@ -150,7 +150,7 @@ end, { desc = "Quit all" })
 -- Mapping to open terminal emulator in nvim
 -- open terminal on alt+t
 map({ "n", "t" }, "<M-t>", function()
-    vim.cmd.split({ "term://" .. vim.env.SHELL })
+    vim.cmd.split({ "term://pwsh.exe"})
     vim.cmd.resize({ 15 })
 end)
 -- mapping to close terminal emulator
