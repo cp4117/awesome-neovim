@@ -10,7 +10,9 @@ return {
                     bind = true,
                     max_height = float.max_height,
                     max_width = float.max_width,
-                    hint_inline = true,
+                    hint_inline = function()
+                        return true
+                    end,
                     handler_opts = {
                         border = float.border,
                     },
