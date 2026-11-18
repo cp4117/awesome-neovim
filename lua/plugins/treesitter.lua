@@ -2,64 +2,31 @@
 return {
     -- Nvim Treesitter configurations and abstraction layer
     {
-        "nvim-treesitter/nvim-treesitter",
-        event = { "BufReadPost", "BufNewFile" },
-        keys = {
-            { "<c-space>", desc = "Increment selection" },
-            { "<bs>", desc = "Decrement selection", mode = "x" },
-        },
-        build = function()
-            vim.cmd("TSUpdate")
-        end,
-        opts = {
-            -- A list of parser names, or "all" (the 1st five listed parsers should always be installed)
-            -- For web dev "jsonc", "typescript", "css", "html", "vue",
-            ensure_installed = {
-                "c",
-                "lua",
-                "vim",
-                "vimdoc",
-                "query",
-                "cpp",
-                "zig",
-                "norg",
-                "bash",
-                "glsl",
-                "markdown",
-                "markdown_inline",
-            },
-            -- Install parsers synchronously (only applied to `ensure_installed`)
-            sync_install = false,
-            -- Automatically install missing parsers when entering buffer
-            -- Recommendation: set to false if you don't have `tree-sitter` CLI installed locally
-            auto_install = true,
-            ignore_install = {}, -- List of parsers to ignore installing
-            highlight = {
-                enable = true, -- false will disable the whole extension
-                disable = {}, -- list of language that will be disabled
-            },
-            --Incremental selection based on the named nodes from the grammar.
-            incremental_selection = {
-                enable = true,
-                keymaps = {
-                    init_selection = "<C-space>",
-                    node_incremental = "<C-space>",
-                    scope_incremental = "<nop>",
-                    node_decremental = "<bs>",
-                },
-            },
-            --Indentation based on treesitter for the = operator.
-            indent = {
-                enable = true,
-            },
-            autopairs = { enable = true },
-        },
-        config = function(_, opts)
-            require("nvim-treesitter.configs").setup(opts)
-        end,
-    },
+      "nvim-treesitter/nvim-treesitter",
+      branch = "main",
+      lazy = false,
+      build = ":TSUpdate",
+      config = function()
+          require("nvim-treesitter").install({
+              "c", "cpp", "lua", "vim", "vimdoc", "query",
+              "zig", "bash", "glsl", "markdown", "markdown_inline",
+              -- "norg",  -- see note below
+          })
+
+          vim.api.nvim_create_autocmd("FileType", {
+              callback = function(args)
+                  -- start highlighting only if a parser exists for this filetype
+                  local lang = vim.treesitter.language.get_lang(args.match)
+                  if lang and pcall(vim.treesitter.language.add, lang) then
+                      pcall(vim.treesitter.start, args.buf, lang)
+                      vim.bo[args.buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+                  end
+              end,
+          })
+      end,    },
     {
         "nvim-treesitter/nvim-treesitter-textobjects",
+        branch = "main",
         keys = {
             { "<LocalLeader>tsto", desc = "Enable Treesitter textobjects" },
         },
